@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { createClient, RedisClientType } from 'redis';
 
 @Injectable()
-class TokenStorageService implements OnModuleInit, OnModuleDestroy {
+export class TokenStorageService implements OnModuleInit, OnModuleDestroy {
   private client: RedisClientType;
   private readonly TTL = 40 * 60; // 40 minutes
 
@@ -32,5 +32,3 @@ class TokenStorageService implements OnModuleInit, OnModuleDestroy {
     return (await this.client.exists(token)) === 1;
   }
 }
-
-export default TokenStorageService;

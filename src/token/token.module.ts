@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TokenController } from './token.controller';
-import TokenService from './token.service';
-import TokenStorageService from './token-storage.service';
+import { TokenService } from './token.service';
+import { TokenStorageService } from './token-storage.service';
 import { TokenGuard } from './token.guard';
 
 @Module({

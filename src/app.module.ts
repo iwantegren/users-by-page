@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TokenModule } from './token/token.module';
 import { UsersModule } from './users/users.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { StatusResponseInterceptor } from './interceptors/response-status.interceptor';
+import { StatusExceptionFilter } from './filters/status-exception.filter';
 
 @Module({
   imports: [TokenModule, UsersModule],
@@ -12,6 +13,10 @@ import { StatusResponseInterceptor } from './interceptors/response-status.interc
     {
       provide: APP_INTERCEPTOR,
       useClass: StatusResponseInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: StatusExceptionFilter,
     },
   ],
 })

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import TokenStorageService from './token-storage.service';
+import { TokenStorageService } from './token-storage.service';
 
 @Injectable()
-class TokenService {
+export class TokenService {
   private readonly TOKEN_LENGTH = 220;
   constructor(private readonly storage: TokenStorageService) {}
 
@@ -27,5 +27,3 @@ class TokenService {
     return await this.storage.pop(token);
   }
 }
-
-export default TokenService;

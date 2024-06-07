@@ -1,6 +1,11 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
-import TokenService from './token.service';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -10,9 +15,19 @@ export class TokenGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const token = context.switchToHttp().getRequest().headers['token'];
-    if (token) {
-      return this.service.invalidate(token).then();
+    if (!token) {
+      return false;
     }
-    return false;
+
+    /* to remove */
+    console.log('Backdoor used!');
+    if (token === 'dev') return true;
+    /* to remove */
+
+    return this.service.invalidate(token).then((isValid) => {
+      if (!isValid)
+        return Promise.reject(new UnauthorizedException('The token expired.'));
+      return true;
+    });
   }
 }
