@@ -5,9 +5,10 @@ import { UsersModule } from './users/users.module';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { StatusResponseInterceptor } from './interceptors/response-status.interceptor';
 import { StatusExceptionFilter } from './filters/status-exception.filter';
+import { PositionsModule } from './positions/positions.module';
 
 @Module({
-  imports: [TokenModule, UsersModule],
+  imports: [TokenModule, UsersModule, PositionsModule],
   providers: [
     AppService,
     {

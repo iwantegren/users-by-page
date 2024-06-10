@@ -1,11 +1,12 @@
 import {
   IsEmail,
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsString,
   Length,
   Matches,
 } from 'class-validator';
+import { IsPositionId } from 'src/positions/position.validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -25,8 +26,8 @@ export class CreateUserDto {
   phone: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  // TBD: validation with positions list
+  @IsInt()
+  @IsPositionId()
   position_id: number;
 
   @IsNotEmpty()
