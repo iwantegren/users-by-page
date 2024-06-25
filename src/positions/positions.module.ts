@@ -6,5 +6,6 @@ import { IsPositionIdConstraint } from './position.validator';
 @Module({
   providers: [PositionsService, IsPositionIdConstraint],
   controllers: [PositionsController],
+  exports: [PositionsService],
 })
 export class PositionsModule {}

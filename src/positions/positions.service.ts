@@ -27,7 +27,6 @@ export class PositionsService {
   }
 
   async getName(id: number): Promise<string | undefined> {
-    console.log('getName');
     return this.positions.find((pos) => pos.id === id)?.name ?? undefined;
   }
 }

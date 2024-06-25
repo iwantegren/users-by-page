@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -22,38 +24,31 @@ export class UsersController {
   @UseGuards(TokenGuard)
   async registerUser(@Body() user: CreateUserDto) {
     return {
-      user_id: await this.service.createUser(user),
+      user_id: (await this.service.createUser(user)).id,
       message: 'New user successfully registered',
     };
   }
 
   @Get()
   async getUsersPage(
-    @Query('page', PositiveNumberPipe.withValue(undefined)) page: number,
-    @Query('count', PositiveNumberPipe.withValue(5)) count: number,
+    @Query('page', ParseIntPipe, PositiveNumberPipe) page: any,
+    @Query('count', new DefaultValuePipe(5), ParseIntPipe, PositiveNumberPipe)
+    count: any,
   ): Promise<ReadPageDto> {
-    return {
-      page,
-      total_pages: -1,
-      total_users: -1,
-      count,
-      links: { next_url: 'next.com', prev_url: null },
-      users: [],
-    };
+    return await this.service.readPage(page, count);
+  }
+
+  @Get('all')
+  async getAll() {
+    return this.service.findAll();
   }
 
   @Get(':id')
-  async getUserById(@Param('id') id: number): Promise<{ user: ReadUserDto }> {
+  async getUserById(
+    @Param('id', PositiveNumberPipe) id: number,
+  ): Promise<{ user: ReadUserDto }> {
     return {
-      user: {
-        id,
-        name: 'name',
-        email: 'email',
-        phone: 'phone',
-        position: 'position',
-        position_id: 2,
-        photo: 'photo',
-      },
+      user: await this.service.readById(id),
     };
   }
 }
