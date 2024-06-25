@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto, UserEntity } from './dto/create-user.dto';
-import { ReadPageDto } from './dto/read-page.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { ReadUserDto } from './dto/read-user.dto';
 import { PositionsService } from 'src/positions/positions.service';
+import { IPaginationMeta, paginate } from 'nestjs-typeorm-paginate';
 
 const UNIQUE_VIOLATION_CODE = '23505';
 
@@ -41,15 +41,25 @@ export class UsersService {
     return this.repo.find();
   }
 
-  async readPage(page: number, count: number): Promise<ReadPageDto> {
-    return {
+  async readPage(
+    page: number,
+    count: number,
+  ): Promise<{ users: ReadUserDto[]; meta: IPaginationMeta }> {
+    const { items, meta } = await paginate<UserEntity>(this.repo, {
       page,
-      total_pages: -1,
-      total_users: -1,
-      count,
-      links: { next_url: 'next.com', prev_url: null },
-      users: [],
-    };
+      limit: count,
+    });
+
+    if (items.length === 0) throw new NotFoundException('Page not found');
+
+    const users = await Promise.all(
+      items.map(async (item) => ({
+        ...item,
+        position: await this.positionService.getName(item.position_id),
+      })),
+    );
+
+    return { users, meta };
   }
 
   async readById(id: number): Promise<ReadUserDto> {
