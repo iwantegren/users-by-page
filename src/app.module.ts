@@ -8,6 +8,7 @@ import { PositionsModule } from './positions/positions.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserEntity } from './users/dto/create-user.dto';
+import { PositionDto } from './positions/dto/position.dto';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -18,7 +19,7 @@ export const typeOrmConfig = (
   username: configService.getOrThrow<string>('PGSQL_USER'),
   password: configService.getOrThrow<string>('PGSQL_PASSWORD'),
   database: configService.getOrThrow<string>('PGSQL_DBNAME'),
-  entities: [UserEntity],
+  entities: [UserEntity, PositionDto],
   synchronize: true,
 });
 

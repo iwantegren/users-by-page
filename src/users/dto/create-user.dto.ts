@@ -5,8 +5,9 @@ import {
   IsString,
   Length,
   Matches,
+  Max,
+  Min,
 } from 'class-validator';
-import { IsPositionId } from 'src/positions/position.validator';
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 export class CreateUserDto {
@@ -32,7 +33,6 @@ export class CreateUserDto {
   @Column()
   @IsNotEmpty()
   @IsInt()
-  @IsPositionId()
   position_id: number;
 
   @Column()

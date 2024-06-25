@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PositionsService } from './positions.service';
 import { PositionsController } from './positions.controller';
-import { IsPositionIdConstraint } from './position.validator';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PositionDto } from './dto/position.dto';
 
 @Module({
-  providers: [PositionsService, IsPositionIdConstraint],
+  imports: [TypeOrmModule.forFeature([PositionDto])],
+  providers: [PositionsService],
   controllers: [PositionsController],
   exports: [PositionsService],
 })

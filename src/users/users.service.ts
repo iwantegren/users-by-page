@@ -37,10 +37,6 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<UserEntity[]> {
-    return this.repo.find();
-  }
-
   async readPage(
     page: number,
     count: number,
@@ -50,7 +46,8 @@ export class UsersService {
       limit: count,
     });
 
-    if (items.length === 0) throw new NotFoundException('Page not found');
+    if (items.length === 0 && page !== 1)
+      throw new NotFoundException('Page not found');
 
     const users = await Promise.all(
       items.map(async (item) => ({
