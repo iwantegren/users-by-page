@@ -5,12 +5,14 @@ import { TokenModule } from 'src/token/token.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './dto/create-user.dto';
 import { PositionsModule } from 'src/positions/positions.module';
+import { PhotoModule } from 'src/photo/photo.module';
 
 @Module({
   imports: [
     TokenModule,
     TypeOrmModule.forFeature([UserEntity]),
     PositionsModule,
+    PhotoModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

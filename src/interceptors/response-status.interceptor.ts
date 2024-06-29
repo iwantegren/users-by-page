@@ -12,6 +12,17 @@ export class StatusResponseInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
-    return next.handle().pipe(map((data) => ({ ...data, success: true })));
+    const ctx = context.switchToHttp();
+    const response = ctx.getResponse();
+
+    return next.handle().pipe(
+      map((data) => {
+        const contentType = response.getHeader('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          return { ...data, success: true };
+        }
+        return data;
+      }),
+    );
   }
 }

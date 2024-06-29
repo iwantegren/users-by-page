@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserEntity } from './users/dto/create-user.dto';
 import { PositionDto } from './positions/dto/position.dto';
+import { PhotoModule } from './photo/photo.module';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -33,6 +34,7 @@ export const typeOrmConfig = (
       inject: [ConfigService],
       useFactory: typeOrmConfig,
     }),
+    PhotoModule,
   ],
   providers: [
     {

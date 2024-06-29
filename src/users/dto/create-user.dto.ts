@@ -1,12 +1,10 @@
 import {
   IsEmail,
-  IsInt,
   IsNotEmpty,
+  IsNumberString,
   IsString,
   Length,
   Matches,
-  Max,
-  Min,
 } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
@@ -32,13 +30,8 @@ export class CreateUserDto {
 
   @Column()
   @IsNotEmpty()
-  @IsInt()
+  @IsNumberString()
   position_id: number;
-
-  @Column()
-  @IsNotEmpty()
-  // TBD: photo handling
-  photo: string;
 }
 
 @Entity()
@@ -47,4 +40,7 @@ export class CreateUserDto {
 export class UserEntity extends CreateUserDto {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
+  photo: string;
 }

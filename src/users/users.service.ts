@@ -19,7 +19,9 @@ export class UsersService {
     private readonly positionService: PositionsService,
   ) {}
 
-  async createUser(user: CreateUserDto): Promise<UserEntity> {
+  async createUser(
+    user: CreateUserDto & { photo: string },
+  ): Promise<UserEntity> {
     try {
       const newRecord = this.repo.create(user);
       return await this.repo.save(newRecord);
