@@ -39,13 +39,13 @@ export class UsersController {
     await this.photoService.validate(file);
     const filename = await this.photoService.save(file, user);
 
+    const createdUser = await this.service.createUser({
+      ...user,
+      photo: this.photoService.getPhotoUrl(url, filename),
+    });
+
     return {
-      user_id: (
-        await this.service.createUser({
-          ...user,
-          photo: `${url}/images/users/${filename}`,
-        })
-      ).id,
+      user_id: createdUser.id,
       message: 'New user successfully registered',
     };
   }

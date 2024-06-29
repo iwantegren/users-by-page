@@ -85,4 +85,8 @@ export class PhotoService {
   delete(filename: string) {
     fs.rmSync(path.join(this.photosDir, filename));
   }
+
+  getPhotoUrl(hostUrl: string, filename: string) {
+    return `${hostUrl}/images/users/${filename}`;
+  }
 }
