@@ -13,11 +13,11 @@ export class TokenStorageService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    await this.client.connect();
+    if (!this.client.isOpen) await this.client.connect();
   }
 
   async onModuleDestroy() {
-    await this.client.disconnect();
+    if (this.client.isOpen) await this.client.disconnect();
   }
 
   async push(token: string): Promise<void> {

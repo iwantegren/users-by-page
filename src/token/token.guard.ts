@@ -19,11 +19,6 @@ export class TokenGuard implements CanActivate {
       return false;
     }
 
-    /* to remove */
-    console.log('Backdoor used!');
-    if (token === 'dev') return true;
-    /* to remove */
-
     return this.service.invalidate(token).then((isValid) => {
       if (!isValid)
         return Promise.reject(new UnauthorizedException('The token expired.'));

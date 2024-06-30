@@ -16,5 +16,6 @@ import { PhotoModule } from 'src/photo/photo.module';
   ],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
