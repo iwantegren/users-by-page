@@ -58,6 +58,8 @@ export class UsersService {
       })),
     );
 
+    console.log({ users });
+
     return { users, meta };
   }
 

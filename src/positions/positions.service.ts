@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PositionDto } from './dto/position.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
@@ -6,12 +11,17 @@ import { QueryFailedError, Repository } from 'typeorm';
 const UNIQUE_VIOLATION_CODE = '23505';
 
 @Injectable()
-export class PositionsService {
+export class PositionsService implements OnModuleInit {
+  private readonly logger = new Logger(PositionsService.name);
   private positions: PositionDto[] = [];
 
   constructor(
     @InjectRepository(PositionDto) private repo: Repository<PositionDto>,
   ) {}
+
+  async onModuleInit() {
+    this.positions = await this.repo.find();
+  }
 
   async addPosition(name: string): Promise<PositionDto> {
     try {
@@ -33,6 +43,7 @@ export class PositionsService {
   }
 
   async getPositions(): Promise<PositionDto[]> {
+    this.logger.debug('Read positions');
     if (this.positions.length === 0) {
       this.positions = await this.repo.find();
     }
