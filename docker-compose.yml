@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: 'production'
+      PGSQL_HOST: postgresql
+      PGSQL_PORT: 5432
+      PGSQL_USER: ${PGSQL_USER}
+      PGSQL_PASSWORD: ${PGSQL_PASSWORD}
+      PGSQL_DBNAME: ${PGSQL_DBNAME}
+      TINIFY_API_KEY: ${TINIFY_API_KEY}
+      FRONTEND_URL: ${FRONTEND_URL}
+      NEST_LOG_LEVELS: ${NEST_LOG_LEVELS}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgresql
+      - redis
+
+  postgresql:
+    image: postgres:alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${PGSQL_DBNAME}
+      POSTGRES_USER: ${PGSQL_USER}
+      POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:

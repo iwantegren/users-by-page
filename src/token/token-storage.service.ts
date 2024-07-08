@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, RedisClientType } from 'redis';
 
 @Injectable()
@@ -6,9 +7,9 @@ export class TokenStorageService implements OnModuleInit, OnModuleDestroy {
   private client: RedisClientType;
   private readonly TTL = 40 * 60; // 40 minutes
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.client = createClient({
-      url: 'redis://localhost:6379',
+      url: `redis://${configService.getOrThrow('REDIS_HOST')}:${configService.getOrThrow('REDIS_PORT')}`,
     });
   }
 
