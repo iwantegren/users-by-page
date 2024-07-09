@@ -6,16 +6,26 @@ import * as faker from 'faker';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { PhotoService } from 'src/photo/photo.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SeedService {
   private readonly logger = new Logger(SeedService.name);
+  private readonly baseUrl: string;
 
   constructor(
     private readonly positionsService: PositionsService,
     private readonly usersService: UsersService,
     private readonly photoService: PhotoService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.baseUrl = configService.get('BACKEND_URL') ?? '';
+    if (this.baseUrl === '') {
+      this.logger.error(
+        'Base URL is not specified. Photos could be unaccessible',
+      );
+    }
+  }
 
   async seedPositions() {
     const filePath = path.join(__dirname, 'positions.txt');
@@ -59,7 +69,7 @@ export class SeedService {
     return file;
   }
 
-  async seedUsers(baseUrl: string) {
+  async seedUsers() {
     const userCount = 45;
     const file = await this.loadAsMulterFile('fake.jpg');
 
@@ -76,7 +86,7 @@ export class SeedService {
       try {
         await this.usersService.createUser({
           ...user,
-          photo: this.photoService.getPhotoUrl(baseUrl, filename),
+          photo: this.photoService.getPhotoUrl(this.baseUrl, filename),
         });
       } catch (error) {
         if (error instanceof ConflictException) {

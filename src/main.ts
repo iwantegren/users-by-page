@@ -9,7 +9,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   app.enableCors({
-    origin: configService.get('FRONTEND_URL'),
+    origin: '*' /* configService.get('FRONTEND_URL') */,
     credentials: true,
   });
 
