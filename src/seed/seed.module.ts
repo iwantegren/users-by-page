@@ -5,6 +5,8 @@ import { DatabaseModule } from 'src/database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from 'src/users/users.module';
 import { PhotoModule } from 'src/photo/photo.module';
+import { SeedController } from './seed.controller';
+import { SeedKeyGuard } from './seed.guard';
 
 @Module({
   imports: [
@@ -14,7 +16,8 @@ import { PhotoModule } from 'src/photo/photo.module';
     DatabaseModule,
     PhotoModule,
   ],
-  providers: [SeedService],
+  providers: [SeedService, SeedKeyGuard],
   exports: [SeedService],
+  controllers: [SeedController],
 })
 export class SeedModule {}

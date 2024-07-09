@@ -28,7 +28,7 @@ export class SeedService {
   }
 
   async seedPositions() {
-    const filePath = path.join(__dirname, 'positions.txt');
+    const filePath = path.join(__dirname, '..', '..', 'res', 'positions.txt');
     const positions = fs.readFileSync(filePath, 'utf-8').split('\n');
 
     for (const position of positions) {

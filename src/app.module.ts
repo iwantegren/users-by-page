@@ -8,6 +8,7 @@ import { PositionsModule } from './positions/positions.module';
 import { ConfigModule } from '@nestjs/config';
 import { PhotoModule } from './photo/photo.module';
 import { DatabaseModule } from './database/database.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { DatabaseModule } from './database/database.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PhotoModule,
     DatabaseModule,
+    SeedModule,
   ],
   providers: [
     {
