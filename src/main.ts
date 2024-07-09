@@ -16,6 +16,6 @@ async function bootstrap() {
   const logLevels = configService.get<string>('NEST_LOG_LEVELS')?.split(',');
   if (logLevels) app.useLogger(logLevels as LogLevel[]);
 
-  await app.listen(3000);
+  await app.listen(configService.getOrThrow('PORT'));
 }
 bootstrap();
