@@ -7,16 +7,19 @@ import { PositionDto } from 'src/positions/dto/position.dto';
 
 export const typeOrmConfig = (
   configService: ConfigService,
-): TypeOrmModuleOptions => ({
-  type: 'postgres',
-  host: configService.getOrThrow<string>('PGSQL_HOST'),
-  port: configService.getOrThrow<number>('PGSQL_PORT'),
-  username: configService.getOrThrow<string>('PGSQL_USER'),
-  password: configService.getOrThrow<string>('PGSQL_PASSWORD'),
-  database: configService.getOrThrow<string>('PGSQL_DBNAME'),
-  entities: [UserEntity, PositionDto],
-  synchronize: true,
-});
+): TypeOrmModuleOptions => {
+  const url = configService.getOrThrow<string>('POSTGRESQL_URL');
+
+  return {
+    type: 'postgres',
+    url,
+    entities: [UserEntity, PositionDto],
+    synchronize: true,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
+};
 
 @Module({
   imports: [

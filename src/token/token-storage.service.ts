@@ -9,7 +9,7 @@ export class TokenStorageService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly configService: ConfigService) {
     this.client = createClient({
-      url: `redis://${configService.getOrThrow('REDIS_HOST')}:${configService.getOrThrow('REDIS_PORT')}`,
+      url: configService.getOrThrow('REDIS_URL'),
     });
   }
 
