@@ -8,32 +8,25 @@ export class TinifyService {
     tinify.key = configService.getOrThrow<string>('TINIFY_API_KEY');
   }
 
-  async crop(src: string, dst: string, width, height): Promise<void> {
+  async crop(
+    file: Uint8Array,
+    width: number,
+    height: number,
+  ): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       tinify
-        .fromFile(src)
+        .fromBuffer(file)
         .resize({
           method: 'cover',
           width,
           height,
         })
-        .toFile(dst, (err) => {
+        .toBuffer((err, resultBuffer) => {
           if (err) {
             return reject(new BadRequestException('Image cropping failed'));
           }
-          resolve();
+          resolve(resultBuffer);
         });
-    });
-  }
-
-  async optimize(src: string, dst: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      tinify.fromFile(src).toFile(dst, (err) => {
-        if (err) {
-          return reject(new BadRequestException('Image optimization failed'));
-        }
-        resolve();
-      });
     });
   }
 }

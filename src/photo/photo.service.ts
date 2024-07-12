@@ -1,16 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as sharp from 'sharp';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { TinifyService } from './tinify.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserPhotoDto, UserPhotoEntity } from './dto/user-photo.dto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PhotoService {
   private readonly photosDir: string;
   private readonly requiredSize = 70;
 
-  constructor(private readonly tinifyService: TinifyService) {
+  constructor(
+    @InjectRepository(UserPhotoEntity)
+    private readonly repo: Repository<UserPhotoEntity>,
+    private readonly tinifyService: TinifyService,
+  ) {
     this.photosDir = path.join(__dirname, '..', '..', 'images', 'users');
   }
 
@@ -45,48 +55,38 @@ export class PhotoService {
     }
   }
 
-  async load(filename: string): Promise<Buffer> {
-    return fs.promises.readFile(path.join(this.photosDir, filename));
-  }
-
-  async save(file: Express.Multer.File, user: CreateUserDto): Promise<string> {
-    const final = `photo-${user.email}${path.extname(file.originalname)}`;
-
-    const raw = final + '.raw';
-    await this.saveToFile(file, path.join(this.photosDir, raw));
-
-    const crop = raw + '.crop';
-    await this.tinifyService.crop(
-      path.join(this.photosDir, raw),
-      path.join(this.photosDir, crop),
+  async process(file: Buffer) {
+    return await this.tinifyService.crop(
+      file,
       this.requiredSize,
       this.requiredSize,
     );
-
-    await this.tinifyService.optimize(
-      path.join(this.photosDir, crop),
-      path.join(this.photosDir, final),
-    );
-
-    this.delete(raw);
-    this.delete(crop);
-
-    return final;
   }
 
-  private async saveToFile(file: Express.Multer.File, dst: string) {
-    if (!fs.existsSync(this.photosDir)) {
-      fs.mkdirSync(this.photosDir, { recursive: true });
+  async save(file: Express.Multer.File, user: CreateUserDto, process = true) {
+    const filename = this.getPhotoFilename(file, user);
+    const photo = process
+      ? Buffer.from(await this.process(file.buffer))
+      : file.buffer;
+
+    const userPhoto: UserPhotoDto = { name: filename, photo };
+    await this.repo.save(userPhoto);
+    return filename;
+  }
+
+  async load(name: string): Promise<Buffer> {
+    const userPhoto = await this.repo.findOne({ where: { name } });
+    if (!userPhoto) {
+      throw new NotFoundException('Photo is missing in database');
     }
-
-    await fs.promises.writeFile(dst, file.buffer);
-  }
-
-  delete(filename: string) {
-    fs.rmSync(path.join(this.photosDir, filename));
+    return userPhoto.photo;
   }
 
   getPhotoUrl(hostUrl: string, filename: string) {
     return `${hostUrl}/images/users/${filename}`;
+  }
+
+  getPhotoFilename(file: Express.Multer.File, user: CreateUserDto) {
+    return `${user.email}-photo${path.extname(file.originalname)}`;
   }
 }
