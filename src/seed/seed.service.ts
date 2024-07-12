@@ -51,7 +51,9 @@ export class SeedService {
   private async loadAsMulterFile(
     filename: string,
   ): Promise<Express.Multer.File> {
-    const buffer = await fs.promises.readFile(path.join(__dirname, filename));
+    const buffer = await fs.promises.readFile(
+      path.join(__dirname, '..', '..', 'res', filename),
+    );
 
     const file: Express.Multer.File = {
       fieldname: 'file',

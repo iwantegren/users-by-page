@@ -11,4 +11,10 @@ export class SeedController {
   async seedPositions() {
     await this.service.seedPositions();
   }
+
+  @Post('users')
+  @UseGuards(SeedKeyGuard)
+  async seedUsers() {
+    await this.service.seedUsers();
+  }
 }
