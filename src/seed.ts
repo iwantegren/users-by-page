@@ -7,7 +7,7 @@ async function bootstrap() {
   const seedService = app.get(SeedService);
 
   await seedService.seedPositions();
-  await seedService.seedUsers();
+  await seedService.seedUsers(45);
 
   await app.close();
 }

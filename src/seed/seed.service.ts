@@ -71,8 +71,7 @@ export class SeedService {
     return file;
   }
 
-  async seedUsers() {
-    const userCount = 10;
+  async seedUsers(userCount: number) {
     const file = await this.loadAsMulterFile('fake.jpg');
 
     for (let i = 0; i < userCount; i++) {

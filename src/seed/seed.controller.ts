@@ -1,6 +1,14 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { SeedKeyGuard } from './seed.guard';
 import { SeedService } from './seed.service';
+import { PositiveNumberPipe } from 'src/users/pipes/positive-number.pipe';
 
 @Controller('seed')
 export class SeedController {
@@ -14,7 +22,10 @@ export class SeedController {
 
   @Post('users')
   @UseGuards(SeedKeyGuard)
-  async seedUsers() {
-    await this.service.seedUsers();
+  async seedUsers(
+    @Query('count', new DefaultValuePipe(45), ParseIntPipe, PositiveNumberPipe)
+    count,
+  ) {
+    await this.service.seedUsers(count);
   }
 }
