@@ -43,31 +43,52 @@ export class UsersService {
     page: number,
     count: number,
   ): Promise<{ users: ReadUserDto[]; meta: IPaginationMeta }> {
-    const { items, meta } = await paginate<UserEntity>(this.repo, {
+    const queryBuilder = this.repo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.position', 'position');
+
+    const { items, meta } = await paginate<UserEntity>(queryBuilder, {
       page,
       limit: count,
     });
 
-    if (items.length === 0 && page !== 1)
+    if (items.length === 0 && page !== 1) {
       throw new NotFoundException('Page not found');
+    }
 
-    const users = await Promise.all(
-      items.map(async (item) => ({
-        ...item,
-        position: await this.positionService.getName(item.position_id),
-      })),
-    );
+    const users = items.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      photo: user.photo,
+      position_id: user.position.id,
+      position: user.position.name,
+    }));
 
     return { users, meta };
   }
 
   async readById(id: number): Promise<ReadUserDto> {
-    const user = await this.repo.findOne({ where: { id } });
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.repo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.position', 'position')
+      .select([
+        'user.id as id',
+        'user.name as name',
+        'user.email as email',
+        'user.phone as phone',
+        'user.photo as photo',
+        'user.position_id as position_id',
+        'position.name as position',
+      ])
+      .where('user.id = :id', { id })
+      .getRawOne();
 
-    return {
-      ...user,
-      position: await this.positionService.getName(user.position_id),
-    };
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user as ReadUserDto;
   }
 }

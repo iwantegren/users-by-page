@@ -4,7 +4,7 @@ import {
   Logger,
   OnModuleInit,
 } from '@nestjs/common';
-import { PositionDto } from './dto/position.dto';
+import { PositionDto, PositionEntity } from './dto/position.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 
@@ -13,19 +13,19 @@ const UNIQUE_VIOLATION_CODE = '23505';
 @Injectable()
 export class PositionsService implements OnModuleInit {
   private readonly logger = new Logger(PositionsService.name);
-  private positions: PositionDto[] = [];
+  private positions: PositionEntity[] = [];
 
   constructor(
-    @InjectRepository(PositionDto) private repo: Repository<PositionDto>,
+    @InjectRepository(PositionEntity) private repo: Repository<PositionEntity>,
   ) {}
 
   async onModuleInit() {
     this.positions = await this.repo.find();
   }
 
-  async addPosition(name: string): Promise<PositionDto> {
+  async addPosition(position: PositionDto): Promise<PositionEntity> {
     try {
-      const newRecord = this.repo.create({ name });
+      const newRecord = this.repo.create(position);
       const result = await this.repo.save(newRecord);
 
       this.positions.push(result);
@@ -42,16 +42,12 @@ export class PositionsService implements OnModuleInit {
     }
   }
 
-  async getPositions(): Promise<PositionDto[]> {
+  async getPositions(): Promise<PositionEntity[]> {
     this.logger.debug('Read positions');
     if (this.positions.length === 0) {
       this.positions = await this.repo.find();
     }
 
     return this.positions;
-  }
-
-  async getName(id: number): Promise<string | undefined> {
-    return this.positions.find((pos) => pos.id === id)?.name ?? undefined;
   }
 }

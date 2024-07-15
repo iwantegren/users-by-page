@@ -34,7 +34,7 @@ export class SeedService {
     for (const position of positions) {
       if (position.trim()) {
         try {
-          await this.positionsService.addPosition(position.trim());
+          await this.positionsService.addPosition({ name: position.trim() });
         } catch (error) {
           if (error instanceof ConflictException) {
             this.logger.warn(error);

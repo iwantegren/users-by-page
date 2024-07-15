@@ -6,7 +6,15 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { PositionEntity } from 'src/positions/dto/position.dto';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm';
 
 export class CreateUserDto {
   @Column()
@@ -43,4 +51,8 @@ export class UserEntity extends CreateUserDto {
 
   @Column()
   photo: string;
+
+  @ManyToOne(() => PositionEntity, (position) => position.users)
+  @JoinColumn({ name: 'position_id' })
+  position: PositionEntity;
 }
