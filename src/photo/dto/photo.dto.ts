@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export class UserPhotoDto {
+export class PhotoDto {
   @Column({ unique: true })
   name: string;
 
@@ -9,7 +9,7 @@ export class UserPhotoDto {
 }
 
 @Entity()
-export class UserPhotoEntity extends UserPhotoDto {
+export class PhotoEntity extends PhotoDto {
   @PrimaryGeneratedColumn()
   id: number;
 }

@@ -8,7 +8,7 @@ import * as sharp from 'sharp';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { TinifyService } from './tinify.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserPhotoDto, UserPhotoEntity } from './dto/user-photo.dto';
+import { PhotoDto, PhotoEntity } from './dto/photo.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -17,8 +17,8 @@ export class PhotoService {
   private readonly requiredSize = 70;
 
   constructor(
-    @InjectRepository(UserPhotoEntity)
-    private readonly repo: Repository<UserPhotoEntity>,
+    @InjectRepository(PhotoEntity)
+    private readonly repo: Repository<PhotoEntity>,
     private readonly tinifyService: TinifyService,
   ) {
     this.photosDir = path.join(__dirname, '..', '..', 'images', 'users');
@@ -64,12 +64,12 @@ export class PhotoService {
   }
 
   async save(file: Express.Multer.File, user: CreateUserDto, process = true) {
-    const filename = this.getPhotoFilename(file, user);
+    const filename = PhotoService.getPhotoFilename(file, user);
     const photo = process
       ? Buffer.from(await this.process(file.buffer))
       : file.buffer;
 
-    const userPhoto: UserPhotoDto = { name: filename, photo };
+    const userPhoto: PhotoDto = { name: filename, photo };
     await this.repo.save(userPhoto);
     return filename;
   }
@@ -82,11 +82,23 @@ export class PhotoService {
     return userPhoto.photo;
   }
 
-  getPhotoUrl(hostUrl: string, filename: string) {
+  async createPhotoDto(
+    file: Express.Multer.File,
+    user: CreateUserDto,
+  ): Promise<PhotoDto> {
+    await this.validate(file);
+
+    const name = PhotoService.getPhotoFilename(file, user);
+    const photo = Buffer.from(await this.process(file.buffer));
+
+    return { name, photo };
+  }
+
+  static getPhotoUrl(hostUrl: string, filename: string) {
     return `${hostUrl}/images/users/${filename}`;
   }
 
-  getPhotoFilename(file: Express.Multer.File, user: CreateUserDto) {
+  static getPhotoFilename(file: Express.Multer.File, user: CreateUserDto) {
     return `${user.email}-photo${path.extname(file.originalname)}`;
   }
 }

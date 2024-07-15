@@ -72,7 +72,7 @@ export class SeedService {
   }
 
   async seedUsers() {
-    const userCount = 45;
+    const userCount = 10;
     const file = await this.loadAsMulterFile('fake.jpg');
 
     for (let i = 0; i < userCount; i++) {
@@ -83,13 +83,8 @@ export class SeedService {
         position_id: faker.random.arrayElement([1, 2, 3, 4]), // Assuming these positions exist
       };
 
-      const filename = await this.photoService.save(file, user);
-
       try {
-        await this.usersService.createUser({
-          ...user,
-          photo: this.photoService.getPhotoUrl(this.baseUrl, filename),
-        });
+        await this.usersService.createUserAndPhoto(user, file);
       } catch (error) {
         if (error instanceof ConflictException) {
           this.logger.warn(error);

@@ -5,27 +5,51 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto, UserEntity } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { ReadUserDto } from './dto/read-user.dto';
-import { PositionsService } from 'src/positions/positions.service';
 import { IPaginationMeta, paginate } from 'nestjs-typeorm-paginate';
+import { PhotoEntity } from 'src/photo/dto/photo.dto';
+import { PhotoService } from 'src/photo/photo.service';
 
 const UNIQUE_VIOLATION_CODE = '23505';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity) private repo: Repository<UserEntity>,
-    private readonly positionService: PositionsService,
+    @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
+    @InjectRepository(PhotoEntity)
+    private photoRepo: Repository<PhotoEntity>,
+    private readonly dataSource: DataSource,
+    private readonly photoService: PhotoService,
   ) {}
 
-  async createUser(
-    user: CreateUserDto & { photo: string },
+  async createUserAndPhoto(
+    createUserDto: CreateUserDto,
+    photoFile: Express.Multer.File,
   ): Promise<UserEntity> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const newRecord = this.repo.create(user);
-      return await this.repo.save(newRecord);
+      const photoToSave = Object.assign(new PhotoEntity(), {
+        ...(await this.photoService.createPhotoDto(photoFile, createUserDto)),
+      });
+      const savedPhoto = await queryRunner.manager.save(photoToSave);
+
+      const userToSave: UserEntity = Object.assign(new UserEntity(), {
+        ...createUserDto,
+        photo: savedPhoto,
+      });
+      const savedUser = await queryRunner.manager.save(userToSave);
+
+      await queryRunner.commitTransaction();
+
+      return savedUser;
     } catch (error) {
+      await queryRunner.rollbackTransaction();
+
       if (
         error instanceof QueryFailedError &&
         error.driverError.code === UNIQUE_VIOLATION_CODE
@@ -36,6 +60,8 @@ export class UsersService {
       } else {
         throw error;
       }
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -43,9 +69,10 @@ export class UsersService {
     page: number,
     count: number,
   ): Promise<{ users: ReadUserDto[]; meta: IPaginationMeta }> {
-    const queryBuilder = this.repo
+    const queryBuilder = this.userRepo
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.position', 'position');
+      .leftJoinAndSelect('user.position', 'position')
+      .leftJoinAndSelect('user.photo', 'photo');
 
     const { items, meta } = await paginate<UserEntity>(queryBuilder, {
       page,
@@ -61,7 +88,7 @@ export class UsersService {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      photo: user.photo,
+      photo: user.photo.name,
       position_id: user.position.id,
       position: user.position.name,
     }));
@@ -70,17 +97,18 @@ export class UsersService {
   }
 
   async readById(id: number): Promise<ReadUserDto> {
-    const user = await this.repo
+    const user = await this.userRepo
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.position', 'position')
+      .leftJoinAndSelect('user.photo', 'photo')
       .select([
         'user.id as id',
         'user.name as name',
         'user.email as email',
         'user.phone as phone',
-        'user.photo as photo',
         'user.position_id as position_id',
         'position.name as position',
+        'photo.name as photo',
       ])
       .where('user.id = :id', { id })
       .getRawOne();

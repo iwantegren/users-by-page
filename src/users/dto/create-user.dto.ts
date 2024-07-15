@@ -6,12 +6,14 @@ import {
   Length,
   Matches,
 } from 'class-validator';
+import { PhotoEntity } from 'src/photo/dto/photo.dto';
 import { PositionEntity } from 'src/positions/dto/position.dto';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
@@ -49,8 +51,9 @@ export class UserEntity extends CreateUserDto {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  photo: string;
+  @OneToOne(() => PhotoEntity, { cascade: true })
+  @JoinColumn()
+  photo: PhotoEntity;
 
   @ManyToOne(() => PositionEntity, (position) => position.users)
   @JoinColumn({ name: 'position_id' })

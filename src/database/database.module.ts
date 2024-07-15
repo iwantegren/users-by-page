@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/dto/create-user.dto';
 import { PositionEntity } from 'src/positions/dto/position.dto';
-import { UserPhotoEntity } from 'src/photo/dto/user-photo.dto';
+import { PhotoEntity } from 'src/photo/dto/photo.dto';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -14,7 +14,7 @@ export const typeOrmConfig = (
   return {
     type: 'postgres',
     url,
-    entities: [UserEntity, PositionEntity, UserPhotoEntity],
+    entities: [UserEntity, PositionEntity, PhotoEntity],
     synchronize: true,
     ssl: {
       rejectUnauthorized: false,

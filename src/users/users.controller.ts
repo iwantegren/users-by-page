@@ -34,15 +34,9 @@ export class UsersController {
   async registerUser(
     @UploadedFile() file: Express.Multer.File,
     @Body() user: CreateUserDto,
-    @HostUrl() url: string,
   ) {
     await this.photoService.validate(file);
-    const filename = await this.photoService.save(file, user);
-
-    const createdUser = await this.service.createUser({
-      ...user,
-      photo: this.photoService.getPhotoUrl(url, filename),
-    });
+    const createdUser = await this.service.createUserAndPhoto(user, file);
 
     return {
       user_id: createdUser.id,
@@ -55,18 +49,19 @@ export class UsersController {
     @Query('page', ParseIntPipe, PositiveNumberPipe) page: any,
     @Query('count', new DefaultValuePipe(5), ParseIntPipe, PositiveNumberPipe)
     count: any,
-    @ReqUrl() url: string,
+    @ReqUrl() reqUrl: string,
+    @HostUrl() hostUrl: string,
   ): Promise<ReadPageDto> {
     const { users, meta } = await this.service.readPage(page, count);
 
     const next_url =
       meta.currentPage < meta.totalPages
-        ? `${url}?page=${meta.currentPage + 1}&count=${count}`
+        ? `${reqUrl}?page=${meta.currentPage + 1}&count=${count}`
         : null;
 
     const prev_url =
       meta.currentPage > 1
-        ? `${url}?page=${meta.currentPage - 1}&count=${count}`
+        ? `${reqUrl}?page=${meta.currentPage - 1}&count=${count}`
         : null;
 
     return {
@@ -75,16 +70,21 @@ export class UsersController {
       total_users: meta.totalItems,
       count: meta.itemCount,
       links: { next_url, prev_url },
-      users,
+      users: users.map((user) => ({
+        ...user,
+        photo: PhotoService.getPhotoUrl(hostUrl, user.photo),
+      })),
     };
   }
 
   @Get(':id')
   async getUserById(
     @Param('id', PositiveNumberPipe) id: number,
+    @HostUrl() hostUrl: string,
   ): Promise<{ user: ReadUserDto }> {
+    const user = await this.service.readById(id);
     return {
-      user: await this.service.readById(id),
+      user: { ...user, photo: PhotoService.getPhotoUrl(hostUrl, user.photo) },
     };
   }
 }

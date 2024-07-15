@@ -3,10 +3,10 @@ import { PhotoService } from './photo.service';
 import { PhotoController } from './photo.controller';
 import { TinifyService } from './tinify.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserPhotoEntity } from './dto/user-photo.dto';
+import { PhotoEntity } from './dto/photo.dto';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserPhotoEntity])],
+  imports: [TypeOrmModule.forFeature([PhotoEntity])],
   providers: [PhotoService, TinifyService],
   exports: [PhotoService],
   controllers: [PhotoController],
