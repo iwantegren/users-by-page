@@ -1,73 +1,94 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+## Users by page backend server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> This project has no production goal, some of the features are missing or stubbed
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is a test project, aimed mostly on showing skills in development backend services, code style and system design.<br>
+It implements a primitive system of creating, storing and reading users of the system.<br>
+<br>
+It lacks a lot of functionality such as updating and deleting, authorization and access control strategies, but again, it's not a production ready project.<br>
+It has it's functionlaty and it works stable and robust.
 
-## Description
+### Entry points
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The project has two entry points:
 
-## Installation
+- main.ts: entry point for starting the service
+- seed.ts: utilitary entry point to seed test data to the database
 
-```bash
-$ npm install
-```
+> For this service CORS enabled for all sources to provide access for testing from various sources
+>
+> In production CORS setting should be updated
 
-## Running the app
+## Modules
 
-```bash
-# development
-$ npm run start
+### users
 
-# watch mode
-$ npm run start:dev
+The most important module, that has logic of creating and reading user data.<br>
+Provides features for creating user and reading both single user and page of users.<br>
+Creating user requires token for access.
 
-# production mode
-$ npm run start:prod
-```
+Users can be seeded with [seed module](#seed) using generated data.
 
-## Test
+Uses `nestjs/typeorm` and `nestjs/typeorm-paginate` libs to connect and manipulate data in PostgreSQL.
 
-```bash
-# unit tests
-$ npm run test
+Uses `express.Multer` to handle file handling
 
-# e2e tests
-$ npm run test:e2e
+Uses `class-validator` and `class-transformer` to validate and manipulate incoming data
 
-# test coverage
-$ npm run test:cov
-```
+### positions
 
-## Support
+Small module that handles list of positions.<br>
+Positions doesn't expect a lot of changes, so it provides single endpoint for reading list of positions.<br>
+Uses caching to reduce calls to DB.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Positions either could be added manually to DB or seeded with [seed module](#seed) using predefined values.
 
-## Stay in touch
+Uses `nestjs/typeorm` lib to connect and manipulate data in PostgreSQL.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### photo
 
-## License
+Module incapsulates logic for processing and storing images.<br>
+Provides single endpoint for reading single image using filename.<br>
+Images are saved by [users module](#users) in a transaction to ensure data integrity.<br>
 
-Nest is [MIT licensed](LICENSE).
+Uses `nestjs/typeorm` lib to connect and manipulate data in PostgreSQL.
+
+Uses `sharp` to reach metadata for image validation.
+
+Uses `tinify` lib to communicate with `tinypng.com` service for image processing.
+
+### token
+
+Module that containg logic of working with access tokens.<br>
+Provides one-time token with short TTL that could be used for creating user.<br>
+> For simplicity acquiring of a token doesn't require any other actions now
+>
+> In production authorization should be implemented.
+
+Uses `redis` to ensure token storage and invalidation.
+
+### database
+
+Utilitary module that has the only purpose is to estabilish connection with PostgreSQL database using TypeORM in a single place.
+
+### seed
+
+Module that is used for seeding database with testing data.<br>
+Has separate [entry point](#entry-points) for seeding and also endpoint for seeding, protected by secure key.
+
+Uses `faker` library for generating realistic fake personal data.
+All generated users will have the same standard image.
+
+## Deployment
+
+This service is deployed on Render with Docker container.<br>
+It uses multi-stage build to significantly reduce size of resulting image.
+
+Also I've created and deployed small one-page frontend application just to demonstrate how the backend service works.
+
+> Both the backend and frontend services are on a free tier, so the instances will spin down with inactivity<br>
+> which can delay requests by 50 seconds or more during the first access to a service. 
+
+Links:
+- [Backend service](https://usersbypage-service.onrender.com)
+- [Frontend service](https://test-users-by-page-front.onrender.com)

@@ -10,7 +10,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.set('trust proxy', 1);
   app.enableCors({
-    origin: '*' /* configService.get('FRONTEND_URL') */,
+    origin: '*',
     credentials: true,
   });
 
