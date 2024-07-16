@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto, UserEntity } from './dto/create-user.dto';
@@ -15,6 +16,8 @@ const UNIQUE_VIOLATION_CODE = '23505';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
     @InjectRepository(PhotoEntity)
@@ -45,6 +48,8 @@ export class UsersService {
       const savedUser = await queryRunner.manager.save(userToSave);
 
       await queryRunner.commitTransaction();
+
+      this.logger.debug(`Created user ${savedUser.id}`);
 
       return savedUser;
     } catch (error) {
@@ -93,6 +98,8 @@ export class UsersService {
       position: user.position.name,
     }));
 
+    this.logger.debug(`Read page ${page} with count ${count}`);
+
     return { users, meta };
   }
 
@@ -116,6 +123,8 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    this.logger.debug(`Read user ${id}`);
 
     return user as ReadUserDto;
   }

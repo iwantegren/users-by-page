@@ -29,6 +29,7 @@ export class PositionsService implements OnModuleInit {
       const result = await this.repo.save(newRecord);
 
       this.positions.push(result);
+      this.logger.debug(`Add position ${result}`);
       return result;
     } catch (error) {
       if (
